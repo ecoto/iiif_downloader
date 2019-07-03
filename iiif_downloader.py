@@ -75,7 +75,13 @@ def download_iiif_content(document_url, images_base_path, metadata_file_path, im
                             ('@type' in image['resource'] and image['resource']['@type']=='dctypes:Image' ) )  :
                             scale_image = False
                             if 'service' in image['resource']:
-                                image_url = image['resource']['service']['@id'] + '/full/' + str(image_max_width) + ',/0/default'
+                                # check the context for the API version
+                                if '@context' in image['resource']['service'] and '/1/' in image['resource']['service']['@context']:
+                                    # attempt to retrieve files named 'native' is API v1.1 is used
+                                    image_url = image['resource']['service']['@id'] + '/full/' + str(image_max_width) + ',/0/native'
+                                else:
+                                    # attempt to retrieve files named 'default' otherwise
+                                    image_url = image['resource']['service']['@id'] + '/full/' + str(image_max_width) + ',/0/default'
                                 head_response = requests.head(image_url, allow_redirects=True, verify=False)
                                 if head_response.status_code != 200:
                                     response = requests.get(image['resource']['service']['@id'] + '/info.json', allow_redirects=True, verify=False)
