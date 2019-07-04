@@ -112,11 +112,11 @@ def download_iiif_content(document_url, images_base_path, metadata_file_path, im
                                 if imW > image_max_width: # make sure we are downscaling
                                     scale = float(image_max_width)/imW
                                     img.thumbnail((int(imW*scale), int(imH*scale)), resample=Image.BICUBIC)
-                                img.save(destination_file_path  + '.jpg', 'JPEG') # always store jpg
+                                img.convert('RGB').save(destination_file_path  + '.jpg', 'JPEG') # always store jpg
                                 os.remove(destination_file_path)
                             else:
                                 img = Image.open(destination_file_path)
-                                img.save(destination_file_path  + '.jpg', 'JPEG') # always store jpg
+                                img.convert('RGB').save(destination_file_path  + '.jpg', 'JPEG') # always store jpg
                                 os.remove(destination_file_path)
 
                             img_metadata = { 'filename': os.path.join(destination_folder_name, str(images_counter) + '.jpg') }
