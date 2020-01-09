@@ -1,5 +1,5 @@
 __author__      = 'Ernesto Coto'
-__copyright__   = 'May 2019'
+__copyright__   = 'Jan 2020'
 
 import argparse
 import json
@@ -12,9 +12,11 @@ import csv
 
 # Constants
 IMAGE_MAX_WIDTH = 500
+VERIFY_SSL_CERTIFICATE = False
+
 
 # Functions
-def download_iiif_content(document_url, images_base_path, metadata_file_path, image_max_width):
+def download_iiif_content(document_url, images_base_path, metadata_file_path, image_max_width, verify_ssl_certificate):
     """
     Downloads the images and metadata from a public JSON IIIF document.
     Arguments:
@@ -32,7 +34,7 @@ def download_iiif_content(document_url, images_base_path, metadata_file_path, im
     images_counter = 0
     images_metadata = []
     try:
-        response = requests.get(document_url, allow_redirects=True, verify=False)
+        response = requests.get(document_url, allow_redirects=True, verify=verify_ssl_certificate)
         document = response.json()
 
         if document['@type'] not in [ "sc:Manifest", "sc:Sequence", "sc:Canvas"]:
@@ -77,14 +79,18 @@ def download_iiif_content(document_url, images_base_path, metadata_file_path, im
                             if 'service' in image['resource']:
                                 # check the context for the API version
                                 if '@context' in image['resource']['service'] and '/1/' in image['resource']['service']['@context']:
-                                    # attempt to retrieve files named 'native' is API v1.1 is used
+                                    # attempt to retrieve files named 'native' if API v1.1 is used
                                     image_url = image['resource']['service']['@id'] + '/full/' + str(image_max_width) + ',/0/native'
                                 else:
                                     # attempt to retrieve files named 'default' otherwise
                                     image_url = image['resource']['service']['@id'] + '/full/' + str(image_max_width) + ',/0/default'
-                                head_response = requests.head(image_url, allow_redirects=True, verify=False)
+                                # avoid an (ocasionally) incorrect double // when building the URL
+                                image_url = image_url.replace('//full','/full')
+                                # check if image can be downloaded without specifyng the format...
+                                head_response = requests.head(image_url, allow_redirects=True, verify=True)
                                 if head_response.status_code != 200:
-                                    response = requests.get(image['resource']['service']['@id'] + '/info.json', allow_redirects=True, verify=False)
+                                    # ... try get the format otherwise
+                                    response = requests.get(image['resource']['service']['@id'] + '/info.json', allow_redirects=True, verify=verify_ssl_certificate)
                                     service_document = response.json()
                                     if len(service_document['profile']) > 1:
                                         service_profiles = service_document['profile'][1:] # 0 is always a compliance URL
@@ -103,7 +109,7 @@ def download_iiif_content(document_url, images_base_path, metadata_file_path, im
 
                             print 'Downloading %s' % image_url
                             destination_file_path = os.path.join(destination_folder_path, str(images_counter) )
-                            r = requests.get(image_url, allow_redirects=True, verify=False)
+                            r = requests.get(image_url, allow_redirects=True, verify=verify_ssl_certificate)
                             with open(destination_file_path, 'wb') as newimg:
                                 newimg.write(r.content)
                             if scale_image:
@@ -178,6 +184,7 @@ def main():
     parser.add_argument('images_base_path', metavar='images_base_path', type=str, help='Base folder to store downloaded images')
     parser.add_argument('-m', dest='metadata_file_path', type=str, default=None, help='Path to the CSV file where to store the downloaded metadata. If equal to "None" no metadata will be downloaded. Default: "None"')
     parser.add_argument('-w', dest='image_max_width', type=str, default=IMAGE_MAX_WIDTH, help='Maximum with (in pixels) of downloaded images. Default: %i' % IMAGE_MAX_WIDTH)
+    parser.add_argument('-c', dest='verify_ssl_certificate', default=VERIFY_SSL_CERTIFICATE, action='store_true', help='Enables SSL certificate verification when accessing the manifest and images. Default: %s' % VERIFY_SSL_CERTIFICATE)
     args = parser.parse_args()
 
     if not os.path.exists(args.images_base_path):
@@ -186,13 +193,13 @@ def main():
     if args.metadata_file_path and not os.path.exists(os.path.dirname(args.metadata_file_path)):
         os.makedirs(os.path.dirname(args.metadata_file_path))
 
-    response = requests.get(args.iif_document_url, allow_redirects=True, verify=False)
+    response = requests.get(args.iif_document_url, allow_redirects=True, verify=args.verify_ssl_certificate)
     document = response.json()
     if document['@type'] in [ "sc:Collection" ]:
         for manifest in document['manifests']:
-            download_iiif_content(manifest['@id'], args.images_base_path, args.metadata_file_path, args.image_max_width)
+            download_iiif_content(manifest['@id'], args.images_base_path, args.metadata_file_path, args.image_max_width, args.verify_ssl_certificate)
     elif document['@type'] in [ "sc:Manifest", "sc:Sequence", "sc:Canvas"]:
-        download_iiif_content(args.iif_document_url, args.images_base_path, args.metadata_file_path, args.image_max_width)
+        download_iiif_content(args.iif_document_url, args.images_base_path, args.metadata_file_path, args.image_max_width, args.verify_ssl_certificate)
 
 if __name__== "__main__":
     main()
