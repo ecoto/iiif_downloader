@@ -23,7 +23,7 @@ python -W ignore iiif_downloader.py iif_document_url images_base_path [-m metada
 
 ## Requirements
 
-This software runs over Python 2.7 but should be easily portable to Python 3. It is advised  to create a python virtual environment. Use the following to install the dependencies:
+This software runs over Python 2.7 (at least 2.7.12) but should be easily portable to Python 3. It is advised  to create a python virtual environment. Use the following to install the dependencies:
 
 ```
 pip install -r requirements.txt
