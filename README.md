@@ -7,7 +7,7 @@ This software was created while working at the [Visual Geometry Group](http://ww
 ## Usage
 
 ```
-python iiif_downloader.py iif_document_url images_base_path [-m metadata_file_path] [-w image_max_width]
+python iiif_downloader.py iif_document_url images_base_path [-m metadata_file_path] [-w image_max_width] [-c]
 ```
 where
 
@@ -15,8 +15,9 @@ where
 - **images_base_path**: Base folder to store downloaded images. The folder will be created if it does not exists. The downloaded images will be stored in subfolders within the *images_base_path*. A new subfolder will be created per *Manifest* in the source IIIF document. Once the script has finished its job, a text file called "downloaded_images.txt" inside *images_base_path* will contain the full list of downloaded images. The images will have numbers as filenames, not the names referred to in the source IIIF document. The images will always be stored in JPEG format.
 - **metadata_file_path (optional)**: Path to a CSV file where to store the downloaded metadata. The folder containing the file will be created if it does not exist. The CSV file follows the format of the metadata used by the [vgg_frontend](https://gitlab.com/vgg/vgg_frontend/tree/master#metadata-structure). If the *metadata_file_path* is not specified, no metadata will be downloaded.
 - **image_max_width (optional)**: Maximum image width of downloaded files. The images are not downloaded on full size in order to reduce the downloading time and to make sure all downloaded images have similar dimensions. Therefore, the width of the image is restricted by *image_max_width* and the height is adjusted to keep the original image aspect-ratio. If the *image_max_width* is not specified, the default value specified in the script is used.
+- **c**: Boolean flag that enables SSL certificate verification when accessing the manifest and images. If it is not used, the default behaviour is to not perform certificate verification.
 
-If you want to suppress the "InsecurePlatformWarning" messages, then execute
+If you want to suppress the "InsecurePlatformWarning" messages, use the "-c" command-line option to enable SSL certificate verification, or use "-W ignore" as shown below
 ```
 python -W ignore iiif_downloader.py iif_document_url images_base_path [-m metadata_file_path] [-w image_max_width]
 ```
