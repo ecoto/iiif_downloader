@@ -25,9 +25,9 @@ def download_iiif_content(document_url, images_base_path, metadata_file_path, im
         metadata_file_path: Path to a CSV file where to store the downloaded metadata.
         image_max_width: Max image width of downloaded files.
     """
-    print '======='
+    print ('=======')
 
-    print 'Processing document at %s' % document_url
+    print ('Processing document at %s' % document_url)
     pattern = re.compile('[^a-zA-Z0-9_]')
     string_accepted = pattern.sub('', string.printable)
     doc_label = doc_attribution = doc_description = None
@@ -107,7 +107,7 @@ def download_iiif_content(document_url, images_base_path, metadata_file_path, im
                                 image_url = image['resource']['@id']
                                 scale_image = True
 
-                            print 'Downloading %s' % image_url
+                            print ('Downloading %s' % image_url)
                             destination_file_path = os.path.join(destination_folder_path, str(images_counter) )
                             r = requests.get(image_url, allow_redirects=True, verify=verify_ssl_certificate)
                             with open(destination_file_path, 'wb') as newimg:
@@ -145,12 +145,12 @@ def download_iiif_content(document_url, images_base_path, metadata_file_path, im
                         # remove the file if it was not successfully processed
                         if destination_file_path and os.path.exists(destination_file_path):
                             os.remove(destination_file_path)
-                        print 'Exception while accessing image at url %s, skipping. Problem: %s' % (image_url, str(e))
+                        print ('Exception while accessing image at url %s, skipping. Problem: %s' % (image_url, str(e)))
                         pass
 
         # Save metadata to CSV, if required
         if metadata_file_path:
-            print 'Saving metadata to %s' % metadata_file_path
+            print ('Saving metadata to %s' % metadata_file_path)
             metadata_file_handler = None
             if os.path.exists(metadata_file_path):
                 metadata_file_handler = open(metadata_file_path, 'a')
@@ -165,16 +165,16 @@ def download_iiif_content(document_url, images_base_path, metadata_file_path, im
             metadata_file_handler.close()
 
         downloaded_images_file = os.path.join(images_base_path, 'downloaded_images.txt')
-        print 'Saving list of downloaded files to %s' % downloaded_images_file
+        print ('Saving list of downloaded files to %s' % downloaded_images_file)
         with open(downloaded_images_file, 'a' ) as new_files_list:
             for item in images_metadata:
                 new_files_list.write(item['filename'] + '\n')
 
     except Exception as e:
-        print e
+        print (e)
         pass
 
-    print '======='
+    print ('=======')
 
 def main():
     """ Main method """
