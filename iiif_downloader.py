@@ -2,13 +2,14 @@ __author__      = 'Ernesto Coto'
 __copyright__   = 'Jan 2020'
 
 import argparse
+import csv
 import json
 import os
-import requests
-import string
 import re
+import string
+
+import requests
 from PIL import Image
-import csv
 
 # Constants
 IMAGE_MAX_WIDTH = 500
