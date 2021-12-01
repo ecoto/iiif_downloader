@@ -78,9 +78,9 @@ def download_iiif_content(document_url, images_base_path, metadata_file_path, im
                             ('@type' in image['resource'] and image['resource']['@type']=='dctypes:Image' ) )  :
                             scale_image = False
                             if 'service' in image['resource']:
-                                # check the context for the API version
                                 if image_max_width.isdigit():
                                     image_max_width = image_max_width + ','
+                                # check the context for the API version
                                 if '@context' in image['resource']['service'] and '/1/' in image['resource']['service']['@context']:
                                     # attempt to retrieve files named 'native' if API v1.1 is used
                                     image_url = image['resource']['service']['@id'] + '/full/' + str(image_max_width) + '/0/native'
