@@ -111,7 +111,7 @@ def download_iiif_content(document_url, images_base_path, metadata_file_path, im
                                 scale_image = True
 
                             print ('Downloading %s' % image_url)
-                            destination_file_path = os.path.join(destination_folder_path, str(images_counter) )
+                            destination_file_path = os.path.join(destination_folder_path, str(images_counter).zfill(4) )
                             r = requests.get(image_url, allow_redirects=True, verify=verify_ssl_certificate)
                             with open(destination_file_path, 'wb') as newimg:
                                 newimg.write(r.content)
@@ -128,7 +128,7 @@ def download_iiif_content(document_url, images_base_path, metadata_file_path, im
                                 img.convert('RGB').save(destination_file_path  + '.jpg', 'JPEG') # always store jpg
                                 os.remove(destination_file_path)
 
-                            img_metadata = { 'filename': os.path.join(destination_folder_name, str(images_counter) + '.jpg') }
+                            img_metadata = { 'filename': os.path.join(destination_folder_name, str(images_counter).zfill(4) + '.jpg') }
                             if metadata_file_path:
                                 # save more metadata of current image
                                 img_metadata['file_attributes'] = { }
