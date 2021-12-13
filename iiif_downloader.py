@@ -2,16 +2,17 @@ __author__      = 'Ernesto Coto'
 __copyright__   = 'Jan 2020'
 
 import argparse
+import csv
 import json
 import os
-import requests
-import string
 import re
+import string
+
+import requests
 from PIL import Image
-import csv
 
 # Constants
-IMAGE_MAX_WIDTH = 500
+IMAGE_MAX_WIDTH = "full"
 VERIFY_SSL_CERTIFICATE = False
 
 
@@ -77,13 +78,15 @@ def download_iiif_content(document_url, images_base_path, metadata_file_path, im
                             ('@type' in image['resource'] and image['resource']['@type']=='dctypes:Image' ) )  :
                             scale_image = False
                             if 'service' in image['resource']:
+                                if image_max_width.isdigit():
+                                    image_max_width = image_max_width + ','
                                 # check the context for the API version
                                 if '@context' in image['resource']['service'] and '/1/' in image['resource']['service']['@context']:
                                     # attempt to retrieve files named 'native' if API v1.1 is used
-                                    image_url = image['resource']['service']['@id'] + '/full/' + str(image_max_width) + ',/0/native'
+                                    image_url = image['resource']['service']['@id'] + '/full/' + str(image_max_width) + '/0/native'
                                 else:
                                     # attempt to retrieve files named 'default' otherwise
-                                    image_url = image['resource']['service']['@id'] + '/full/' + str(image_max_width) + ',/0/default'
+                                    image_url = image['resource']['service']['@id'] + '/full/' + str(image_max_width) + '/0/default'
                                 # avoid an (ocasionally) incorrect double // when building the URL
                                 image_url = image_url.replace('//full','/full')
                                 # check if image can be downloaded without specifyng the format...
@@ -108,7 +111,7 @@ def download_iiif_content(document_url, images_base_path, metadata_file_path, im
                                 scale_image = True
 
                             print ('Downloading %s' % image_url)
-                            destination_file_path = os.path.join(destination_folder_path, str(images_counter) )
+                            destination_file_path = os.path.join(destination_folder_path, str(images_counter).zfill(4) )
                             r = requests.get(image_url, allow_redirects=True, verify=verify_ssl_certificate)
                             with open(destination_file_path, 'wb') as newimg:
                                 newimg.write(r.content)
@@ -125,7 +128,7 @@ def download_iiif_content(document_url, images_base_path, metadata_file_path, im
                                 img.convert('RGB').save(destination_file_path  + '.jpg', 'JPEG') # always store jpg
                                 os.remove(destination_file_path)
 
-                            img_metadata = { 'filename': os.path.join(destination_folder_name, str(images_counter) + '.jpg') }
+                            img_metadata = { 'filename': os.path.join(destination_folder_name, str(images_counter).zfill(4) + '.jpg') }
                             if metadata_file_path:
                                 # save more metadata of current image
                                 img_metadata['file_attributes'] = { }
@@ -183,7 +186,7 @@ def main():
     parser.add_argument('iif_document_url', metavar='iif_document_url', type=str, help='URL to IIIF document')
     parser.add_argument('images_base_path', metavar='images_base_path', type=str, help='Base folder to store downloaded images')
     parser.add_argument('-m', dest='metadata_file_path', type=str, default=None, help='Path to the CSV file where to store the downloaded metadata. If equal to "None" no metadata will be downloaded. Default: "None"')
-    parser.add_argument('-w', dest='image_max_width', type=str, default=IMAGE_MAX_WIDTH, help='Maximum with (in pixels) of downloaded images. Default: %i' % IMAGE_MAX_WIDTH)
+    parser.add_argument('-w', dest='image_max_width', type=str, default=IMAGE_MAX_WIDTH, help='Maximum width (in pixels) of downloaded images. Default: %s' % IMAGE_MAX_WIDTH)
     parser.add_argument('-c', dest='verify_ssl_certificate', default=VERIFY_SSL_CERTIFICATE, action='store_true', help='Enables SSL certificate verification when accessing the manifest and images. Default: %s' % VERIFY_SSL_CERTIFICATE)
     args = parser.parse_args()
 
