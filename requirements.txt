@@ -1,6 +1,6 @@
 requests==2.20.0
-Pillow==6.2.0
+Pillow==8.3.2
 argparse==1.2.1
-pyopenssl==17.5.0
+pyopenssl==21.0.0
 pyasn1==0.4.5
 ndg-httpsclient==0.5.1
