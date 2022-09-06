@@ -183,7 +183,7 @@ def main():
     """ Main method """
     # Parse arguments
     parser = argparse.ArgumentParser(description='IIIF Data Downloader')
-    parser.add_argument('iif_document_url', metavar='iif_document_url', type=str, help='URL to IIIF document')
+    parser.add_argument('iiif_document_url', metavar='iiif_document_url', type=str, help='URL to IIIF document')
     parser.add_argument('images_base_path', metavar='images_base_path', type=str, help='Base folder to store downloaded images')
     parser.add_argument('-m', dest='metadata_file_path', type=str, default=None, help='Path to the CSV file where to store the downloaded metadata. If equal to "None" no metadata will be downloaded. Default: "None"')
     parser.add_argument('-w', dest='image_max_width', type=str, default=IMAGE_MAX_WIDTH, help='Maximum width (in pixels) of downloaded images. Default: %s' % IMAGE_MAX_WIDTH)
@@ -196,13 +196,13 @@ def main():
     if args.metadata_file_path and not os.path.exists(os.path.dirname(args.metadata_file_path)):
         os.makedirs(os.path.dirname(args.metadata_file_path))
 
-    response = requests.get(args.iif_document_url, allow_redirects=True, verify=args.verify_ssl_certificate)
+    response = requests.get(args.iiif_document_url, allow_redirects=True, verify=args.verify_ssl_certificate)
     document = response.json()
     if document['@type'] in [ "sc:Collection" ]:
         for manifest in document['manifests']:
             download_iiif_content(manifest['@id'], args.images_base_path, args.metadata_file_path, args.image_max_width, args.verify_ssl_certificate)
     elif document['@type'] in [ "sc:Manifest", "sc:Sequence", "sc:Canvas"]:
-        download_iiif_content(args.iif_document_url, args.images_base_path, args.metadata_file_path, args.image_max_width, args.verify_ssl_certificate)
+        download_iiif_content(args.iiif_document_url, args.images_base_path, args.metadata_file_path, args.image_max_width, args.verify_ssl_certificate)
 
 if __name__== "__main__":
     main()
